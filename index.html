@@ -13,7 +13,6 @@
         gtag('config', 'G-33GB8S94HC');
     </script>
     <style>
-        /* Basic CSS Styling */
         body {
             font-family: 'Arial', sans-serif;
             line-height: 1.6;
@@ -73,6 +72,30 @@
             margin: 1rem 0;
             border-radius: 4px;
         }
+        
+        .total-visitors {
+            display: inline-block;
+            background: #4285f4;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -117,7 +140,53 @@
     </div>
     
     <footer>
-        <p>&copy; 2023 My Website. All visitors tracked via Google Analytics.</p>
+        <p>&copy; 2023 My Website. Total Visitors: <span class="total-visitors" id="visitorCount"><span class="loading-spinner"></span></span></p>
     </footer>
+
+    <script>
+        // Configuration
+        const BASE_VISITORS = 11000; // Starting count as requested
+        const GA_FETCH_INTERVAL = 30000; // 30 seconds between checks
+        
+        // Function to format numbers with commas
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        // Function to simulate fetching from GA API (replace with real API call in production)
+        async function fetchVisitorCount() {
+            // In a real implementation, you would:
+            // 1. Call your backend server
+            // 2. Server would authenticate with GA API
+            // 3. Return the real user count
+            
+            // For this demo, we'll simulate the API response:
+            return {
+                totalUsers: BASE_VISITORS + Math.floor(Math.random() * 1000), // Simulates growth
+                activeUsers: Math.floor(Math.random() * 10) + 1 // Simulates current visitors
+            };
+        }
+        
+        // Function to update the counter
+        async function updateCounter() {
+            try {
+                const data = await fetchVisitorCount();
+                const totalVisitors = formatNumber(data.totalUsers);
+                document.getElementById('visitorCount').innerHTML = totalVisitors;
+                
+                // Optional: Also show active users somewhere
+                // document.getElementById('activeVisitors').textContent = data.activeUsers;
+            } catch (error) {
+                console.error('Error fetching visitor count:', error);
+                document.getElementById('visitorCount').textContent = '11,000+';
+            }
+        }
+        
+        // Initialize and update periodically
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCounter();
+            setInterval(updateCounter, GA_FETCH_INTERVAL);
+        });
+    </script>
 </body>
 </html>
