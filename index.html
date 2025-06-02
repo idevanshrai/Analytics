@@ -3,190 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Personal Website</title>
-    <!-- Google Analytics Tracking Code -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3GB8S94HC"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-33GB8S94HC');
-    </script>
+    <title>Visitor Counter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
             color: #333;
-            background-color: #f5f5f5;
-        }
-        
-        header {
-            background: #4285f4;
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-        }
-        
-        nav {
-            background: #333;
-            padding: 0.5rem;
-        }
-        
-        nav ul {
-            list-style: none;
-            padding: 0;
+            background-color: #f5f7fa;
+            min-height: 100vh;
             display: flex;
+            align-items: center;
             justify-content: center;
+            padding: 2rem 1rem;
         }
-        
-        nav ul li {
-            margin: 0 1rem;
-        }
-        
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-        }
-        
+
         .container {
-            width: 80%;
-            margin: 2rem auto;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
             background: white;
-            padding: 2rem;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        
-        footer {
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             text-align: center;
+        }
+
+        .info-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-top: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
             padding: 1rem;
-            background: #333;
-            color: white;
+            background: #f8fafc;
+            border-radius: 8px;
         }
-        
-        .visitor-counter {
-            background: #f1f1f1;
-            padding: 0.5rem;
-            text-align: center;
-            margin: 1rem 0;
+
+        .stat-title {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #1a56db;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-subtitle {
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 0.875rem;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .country-stats {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .country-bar {
+            background: #e5e7eb;
             border-radius: 4px;
+            height: 8px;
+            margin-top: 0.5rem;
+            overflow: hidden;
         }
-        
-        .total-visitors {
-            display: inline-block;
-            background: #4285f4;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-left: 5px;
+
+        .country-bar-fill {
+            background: #1a56db;
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease;
         }
-        
-        .loading-spinner {
+
+        .loading {
             display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid rgba(255,255,255,0.3);
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 3px solid rgba(26, 86, 219, 0.3);
             border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
+            border-top-color: #1a56db;
+            animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: #dc2626;
+            text-align: center;
+            padding: 1rem;
+            background: #fee2e2;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .country-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .country-name {
+            color: #4b5563;
+        }
+
+        .country-count {
+            color: #1a56db;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to My Website</h1>
-        <p>A simple site with Google Analytics tracking</p>
-    </header>
-    
-    <nav>
-        <ul>
-            <li><a href="#home">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
-    </nav>
-    
     <div class="container">
-        <section id="home">
-            <h2>Home Section</h2>
-            <p>This is a basic website template with Google Analytics already implemented. Visitors to this site are being tracked in your Google Analytics account.</p>
-            
-            <div class="visitor-counter">
-                <p>Visitor tracking is active! Check your Google Analytics dashboard for data.</p>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Total Visitors</div>
+                <div class="stat-value" id="totalVisitors">
+                    <div class="loading"></div>
+                </div>
+                <div class="stat-subtitle">All time</div>
             </div>
-        </section>
-        
-        <section id="about">
-            <h2>About This Site</h2>
-            <p>This template includes:</p>
-            <ul>
-                <li>Google Analytics tracking code in the head section</li>
-                <li>Responsive design that works on mobile devices</li>
-                <li>Basic navigation structure</li>
-                <li>Clean, simple styling</li>
-            </ul>
-        </section>
-        
-        <section id="contact">
-            <h2>Contact</h2>
-            <p>Email: contact@example.com</p>
-        </section>
+
+            <div class="stat-card">
+                <div class="stat-title">Your Region</div>
+                <div class="stat-value" id="visitorCountry">
+                    <div class="loading"></div>
+                </div>
+                <div class="stat-subtitle" id="lastUpdated">Updates every 10 minutes</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Timezone</div>
+                    <div class="info-value" id="timezone">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Browser Info</div>
+                    <div class="info-value" id="userAgent">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Request Type</div>
+                    <div class="info-value" id="requestMethod">Loading...</div>
+                </div>
+            </div>
+
+            <div class="country-stats">
+                <div class="info-label">Visitor Distribution</div>
+                <div id="countryStats"></div>
+            </div>
+        </div>
     </div>
-    
-    <footer>
-        <p>&copy; 2023 My Website. Total Visitors: <span class="total-visitors" id="visitorCount"><span class="loading-spinner"></span></span></p>
-    </footer>
 
     <script>
-        // Configuration
-        const BASE_VISITORS = 11000; // Starting count as requested
-        const GA_FETCH_INTERVAL = 30000; // 30 seconds between checks
+        const COUNTER_API = 'https://visitor-counter.devanshlko.workers.dev';
+        const UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes in milliseconds
         
-        // Function to format numbers with commas
         function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            return new Intl.NumberFormat().format(num);
         }
         
-        // Function to simulate fetching from GA API (replace with real API call in production)
-        async function fetchVisitorCount() {
-            // In a real implementation, you would:
-            // 1. Call your backend server
-            // 2. Server would authenticate with GA API
-            // 3. Return the real user count
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const minutesAgo = Math.round((new Date() - date) / (1000 * 60));
             
-            // For this demo, we'll simulate the API response:
-            return {
-                totalUsers: BASE_VISITORS + Math.floor(Math.random() * 1000), // Simulates growth
-                activeUsers: Math.floor(Math.random() * 10) + 1 // Simulates current visitors
-            };
+            if (minutesAgo < 1) return 'Just now';
+            if (minutesAgo === 1) return '1 minute ago';
+            if (minutesAgo < 60) return `${minutesAgo} minutes ago`;
+            
+            const hoursAgo = Math.floor(minutesAgo / 60);
+            if (hoursAgo === 1) return '1 hour ago';
+            return `${hoursAgo} hours ago`;
+        }
+
+        function formatUserAgent(ua) {
+            const parts = ua.split(' ');
+            // Try to extract the most relevant part
+            for (const part of parts) {
+                if (part.includes('/') && !part.startsWith('(')) {
+                    return part.split('/')[0];
+                }
+            }
+            return ua;
+        }
+
+        function updateCountryStats(stats) {
+            const container = document.getElementById('countryStats');
+            container.innerHTML = '';
+            
+            // Get total visits
+            const total = Object.values(stats).reduce((a, b) => a + b, 0);
+            
+            // Sort countries by visit count
+            const sortedCountries = Object.entries(stats)
+                .sort(([,a], [,b]) => b - a);
+            
+            sortedCountries.forEach(([country, count]) => {
+                const percentage = (count / total * 100).toFixed(1);
+                const div = document.createElement('div');
+                div.className = 'country-item';
+                div.innerHTML = `
+                    <span class="country-name">${country}</span>
+                    <span class="country-count">${count} (${percentage}%)</span>
+                    <div class="country-bar">
+                        <div class="country-bar-fill" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
         }
         
-        // Function to update the counter
-        async function updateCounter() {
+        async function updateStats() {
             try {
-                const data = await fetchVisitorCount();
-                const totalVisitors = formatNumber(data.totalUsers);
-                document.getElementById('visitorCount').innerHTML = totalVisitors;
+                const response = await fetch(COUNTER_API);
+                if (!response.ok) throw new Error('Failed to fetch stats');
                 
-                // Optional: Also show active users somewhere
-                // document.getElementById('activeVisitors').textContent = data.activeUsers;
+                const data = await response.json();
+                
+                // Update total visitors
+                document.getElementById('totalVisitors').textContent = formatNumber(data.totalVisitors);
+                
+                // Update visitor country
+                document.getElementById('visitorCountry').textContent = data.country;
+                
+                // Update last updated time
+                document.getElementById('lastUpdated').textContent = 
+                    `Last updated ${formatTimestamp(data.timestamp)}`;
+
+                // Update additional information
+                document.getElementById('timezone').textContent = data.timezone || 'Unknown';
+                document.getElementById('userAgent').textContent = formatUserAgent(data.userAgent || 'Unknown');
+                document.getElementById('requestMethod').textContent = data.requestMethod || 'Unknown';
+
+                // Update country statistics
+                if (data.countryStats) {
+                    updateCountryStats(data.countryStats);
+                }
+                
             } catch (error) {
-                console.error('Error fetching visitor count:', error);
-                document.getElementById('visitorCount').textContent = '11,000+';
+                console.error('Error fetching stats:', error);
+                const errorElements = document.querySelectorAll('.loading');
+                errorElements.forEach(el => {
+                    el.parentElement.innerHTML = '<div class="error">Failed to load stats</div>';
+                });
             }
         }
         
-        // Initialize and update periodically
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCounter();
-            setInterval(updateCounter, GA_FETCH_INTERVAL);
-        });
+        // Update stats immediately and then every 10 minutes
+        updateStats();
+        setInterval(updateStats, UPDATE_INTERVAL);
     </script>
 </body>
 </html>
