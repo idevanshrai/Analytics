@@ -189,10 +189,6 @@
                     <div class="info-label">Browser Info</div>
                     <div class="info-value" id="userAgent">Loading...</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Request Type</div>
-                    <div class="info-value" id="requestMethod">Loading...</div>
-                </div>
             </div>
 
             <div class="country-stats">
@@ -205,6 +201,42 @@
     <script>
         const COUNTER_API = 'https://visitor-counter.devanshlko.workers.dev';
         const UPDATE_INTERVAL = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+        // Get browser information
+        function getBrowserInfo() {
+            const ua = navigator.userAgent;
+            const browsers = {
+                chrome: /chrome/i,
+                safari: /safari/i,
+                firefox: /firefox/i,
+                edge: /edg/i,
+                opera: /opera/i
+            };
+            
+            // Check for mobile first
+            if (/Mobile|Android|iPhone/i.test(ua)) {
+                return 'Mobile Browser';
+            }
+            
+            // Check for desktop browsers
+            for (const [browser, regex] of Object.entries(browsers)) {
+                if (regex.test(ua)) {
+                    return browser.charAt(0).toUpperCase() + browser.slice(1);
+                }
+            }
+            
+            return 'Unknown Browser';
+        }
+
+        // Get timezone information
+        function getTimezone() {
+            try {
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                return timezone.replace('_', ' ');
+            } catch (e) {
+                return new Date().toString().match(/\(([^)]+)\)/)[1];
+            }
+        }
         
         function formatNumber(num) {
             return new Intl.NumberFormat().format(num);
@@ -221,17 +253,6 @@
             const hoursAgo = Math.floor(minutesAgo / 60);
             if (hoursAgo === 1) return '1 hour ago';
             return `${hoursAgo} hours ago`;
-        }
-
-        function formatUserAgent(ua) {
-            const parts = ua.split(' ');
-            // Try to extract the most relevant part
-            for (const part of parts) {
-                if (part.includes('/') && !part.startsWith('(')) {
-                    return part.split('/')[0];
-                }
-            }
-            return ua;
         }
 
         function updateCountryStats(stats) {
@@ -262,6 +283,10 @@
         
         async function updateStats() {
             try {
+                // Set browser info and timezone immediately
+                document.getElementById('userAgent').textContent = getBrowserInfo();
+                document.getElementById('timezone').textContent = getTimezone();
+
                 const response = await fetch(COUNTER_API);
                 if (!response.ok) throw new Error('Failed to fetch stats');
                 
@@ -276,11 +301,6 @@
                 // Update last updated time
                 document.getElementById('lastUpdated').textContent = 
                     `Last updated ${formatTimestamp(data.timestamp)}`;
-
-                // Update additional information
-                document.getElementById('timezone').textContent = data.timezone || 'Unknown';
-                document.getElementById('userAgent').textContent = formatUserAgent(data.userAgent || 'Unknown');
-                document.getElementById('requestMethod').textContent = data.requestMethod || 'Unknown';
 
                 // Update country statistics
                 if (data.countryStats) {

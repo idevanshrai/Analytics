@@ -20,17 +20,81 @@ async function handleRequest(request) {
     })
   }
 
-  // Get visitor's country from Cloudflare's CF-IPCountry header
+  // Check if this is an admin data request
+  const url = new URL(request.url)
+  if (url.pathname === '/admin/data') {
+    // Get all data from KV
+    const [totalVisitors, countryStatsStr] = await Promise.all([
+      VISITOR_COUNTER.get('total_visitors'),
+      VISITOR_COUNTER.get('country_stats')
+    ])
+
+    const adminData = {
+      total_visitors: totalVisitors ? parseInt(totalVisitors) : 0,
+      country_stats: countryStatsStr ? JSON.parse(countryStatsStr) : {},
+      last_checked: new Date().toISOString()
+    }
+
+    return new Response(JSON.stringify(adminData, null, 2), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
+    })
+  }
+
+  // Debug endpoint to see all headers
+  if (url.pathname === '/debug') {
+    const headers = {};
+    for (const [key, value] of request.headers.entries()) {
+      headers[key] = value;
+    }
+    return new Response(JSON.stringify({ headers }, null, 2), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
+    });
+  }
+
+  // Regular visitor counting logic
   const country = request.headers.get('CF-IPCountry') || 'Unknown'
   
-  // Get user agent information
-  const userAgent = request.headers.get('User-Agent') || 'Unknown'
+  // Get detailed browser info from User-Agent
+  const userAgent = request.headers.get('user-agent') || request.headers.get('User-Agent') || ''
+  let browserInfo = 'Unknown'
   
-  // Get request method
+  if (userAgent) {
+    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+      browserInfo = 'Safari'
+    } else if (userAgent.includes('Firefox')) {
+      browserInfo = 'Firefox'
+    } else if (userAgent.includes('Chrome')) {
+      browserInfo = 'Chrome'
+    } else if (userAgent.includes('Edge')) {
+      browserInfo = 'Edge'
+    } else if (userAgent.includes('Opera')) {
+      browserInfo = 'Opera'
+    } else if (userAgent.includes('Mobile')) {
+      browserInfo = 'Mobile Browser'
+    }
+  }
+
   const requestMethod = request.method
   
-  // Get visitor's timezone using CF header
-  const timezone = request.headers.get('CF-IPTimezone') || 'Unknown'
+  // Get timezone with fallback to region-based timezone
+  let timezone = 'Unknown'
+  const cfCity = request.headers.get('cf-ipcity')
+  const cfRegion = request.headers.get('cf-ipregion')
+  const cfCountry = request.headers.get('cf-ipcountry')
+
+  if (cfCity && cfRegion) {
+    timezone = `${cfCity}, ${cfRegion}`
+  } else if (cfRegion && cfCountry) {
+    timezone = `${cfRegion}, ${cfCountry}`
+  } else if (cfCountry) {
+    timezone = cfCountry
+  }
 
   // Get current count from KV
   let count = await VISITOR_COUNTER.get('total_visitors')
@@ -58,10 +122,16 @@ async function handleRequest(request) {
     totalVisitors: count,
     country: country,
     timezone: timezone,
-    userAgent: userAgent,
+    userAgent: browserInfo,
     requestMethod: requestMethod,
     timestamp: new Date().toISOString(),
-    countryStats: countryStats
+    countryStats: countryStats,
+    debug: {
+      rawUserAgent: userAgent,
+      rawCity: cfCity,
+      rawRegion: cfRegion,
+      rawCountry: cfCountry
+    }
   }
 
   // Return response with CORS headers
